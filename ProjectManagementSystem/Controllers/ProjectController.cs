@@ -9,7 +9,6 @@ using ProjectManagementSystem.Models.DomainModels;
 using ProjectManagementSystem.Models.ViewModels;
 using ProjectManagementSystem.Services;
 
-// For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace ProjectManagementSystem.Controllers
 {
