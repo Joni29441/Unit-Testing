@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using ProjectManagementSystem.Controllers;
@@ -161,6 +162,78 @@ namespace ProjectManagementSystemUnitTests.ControllerTests
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("Index", redirectResult.ActionName);
             Assert.Null(_db.Projects.Find(222));
+        }
+
+        [Fact]
+        public void Get_ListOfProjects()
+        {
+            // Arrange
+            _db.Projects.AddRange(new List<Project>
+            {
+                new Project { Id = 1, Name = "Project 1", ProjectManagerId = "Manager1" },
+                new Project { Id = 2, Name = "Project 2", ProjectManagerId = "Manager2" }
+            });
+            _db.SaveChanges();
+
+            var controller = new ProjectController(_db, null);
+
+            // Act
+            var result = controller.Index();
+
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+            var model = Assert.IsAssignableFrom<IEnumerable<Project>>(viewResult.ViewData.Model);
+            Assert.Equal(2, model.Count());
+        }
+
+        [Fact]
+        public async Task CreatePost_AddsProjectAndRedirectsToIndex()
+        {
+            // Arrange
+            var newProject = new Project { Id = 1, Name = "New Project" };
+            var controller = new ProjectController(_db, _taskServiceMock.Object);
+
+            // Set up HTTP context with user and form data
+            var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, "user1"),
+                new Claim(ClaimTypes.Role, "Project Manager")
+            }));
+
+            var httpContext = new DefaultHttpContext
+            {
+                User = user
+            };
+
+            httpContext.Request.Form = new FormCollection(new Dictionary<string, Microsoft.Extensions.Primitives.StringValues>
+            {
+                { "managerId", "manager1" }
+            });
+
+            var tempData = new TempDataDictionary(httpContext, Mock.Of<ITempDataProvider>())
+            {
+                ["ErrorMessage"] = "Please select a Project Manager."
+            };
+
+            controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = httpContext
+            };
+
+            controller.TempData = tempData;
+
+            // Act
+            var result = await controller.Create(newProject);
+
+            // Assert
+            var redirectToActionResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Index", redirectToActionResult.ActionName);
+
+            var dbProject = await _db.Projects.FindAsync(1);
+            Assert.NotNull(dbProject);
+            Assert.Equal("New Project", dbProject.Name);
+            Assert.Equal("user1", dbProject.ProjectManagerId);
+            Assert.Equal(0, dbProject.Progress);
         }
     }
 }

@@ -45,7 +45,11 @@ namespace ProjectManagementSystem.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Project newProject)
         {
-            var currentUser = HttpContext.User;
+            var currentUser = HttpContext.User; 
+            if (currentUser == null)
+            {
+                return Forbid();
+            }
             var roleName = currentUser.FindFirst(ClaimTypes.Role)?.Value;
             var currentUserId = HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -66,7 +70,7 @@ namespace ProjectManagementSystem.Controllers
             newProject.ProjectManagerId = managerId;
             newProject.Progress = 0;
             _db.Add(newProject);
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
             return RedirectToAction("Index");
         }
 
