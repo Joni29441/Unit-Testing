@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.EntityFrameworkCore;
@@ -48,6 +50,39 @@ namespace ProjectManagementSystemUnitTests.ControllerTests
         }
 
         [Fact]
+        public async void EditPost_UpdatesProjectAndRedirectToIndex()
+        {
+            //Arrange
+            var project = new Project { Id = 1, Name = "Original Project", ProjectManagerId = "123456abc" };
+            _db.Projects.Add(project);
+            _db.SaveChangesAsync();
+
+            var updatedProject = new Project { Id = 1, Name = "Updated Project", ProjectManagerId = "123456abc" };
+            var formCollection = new FormCollection(new Dictionary<string, Microsoft.Extensions.Primitives.StringValues>());
+
+            var httpContext = new DefaultHttpContext
+            {
+                User = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+                  {
+                    new Claim(ClaimTypes.NameIdentifier, "user1")
+                  }))
+            };
+            
+           
+            // Act
+            var result = _controller.Edit(updatedProject);
+
+            // Assert
+            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Index", redirectResult.ActionName);
+
+            var dbProject = await _db.Projects.FindAsync(1);
+            Assert.NotNull(dbProject);
+            Assert.Equal("Updated Project", dbProject.Name);
+            Assert.Null(dbProject.ProjectManagerId);
+        }
+
+        [Fact]
         public void DeletePost_ReturnsNotFound_WhenIdIsNull()
         {
             // Arrange
@@ -85,6 +120,7 @@ namespace ProjectManagementSystemUnitTests.ControllerTests
         [Fact]
         public void DeletePost_NonExistingProject_ReturnsNotFound()
         {
+            //Arrange
             var controller = new ProjectController(_db, _taskServiceMock.Object);
 
             // Act
@@ -112,6 +148,8 @@ namespace ProjectManagementSystemUnitTests.ControllerTests
             Assert.Equal("Index", redirectResult.ActionName);
             Assert.Null(_db.Projects.Find(1));
         }
+
+
 
     }
 
