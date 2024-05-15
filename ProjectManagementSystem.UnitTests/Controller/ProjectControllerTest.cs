@@ -1,15 +1,12 @@
-﻿using System;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using ProjectManagementSystem.Controllers;
 using ProjectManagementSystem.Data;
 using ProjectManagementSystem.Models.DomainModels;
-using ProjectManagementSystem.Models.ViewModels;
 using ProjectManagementSystem.Services;
+using System.Security.Claims;
 
 namespace ProjectManagementSystemUnitTests.ControllerTests
 {
@@ -50,37 +47,53 @@ namespace ProjectManagementSystemUnitTests.ControllerTests
         }
 
         [Fact]
-        public async void EditPost_UpdatesProjectAndRedirectToIndex()
+        public void EditPost_UpdatesProjectAndRedirectToIndex()
         {
-            //Arrange
-            var project = new Project { Id = 1, Name = "Original Project", ProjectManagerId = "123456abc" };
-            _db.Projects.Add(project);
+            // Arrange
+            var project = new Project { Id = 1, Name = "Original Project", ProjectManagerId = "12" };
+            _db.Projects.AddAsync(project);
             _db.SaveChangesAsync();
 
-            var updatedProject = new Project { Id = 1, Name = "Updated Project", ProjectManagerId = "123456abc" };
-            var formCollection = new FormCollection(new Dictionary<string, Microsoft.Extensions.Primitives.StringValues>());
+            var updatedProject = new Project { Id = 1, Name = "Updated Project", ProjectManagerId = "12" };
+            var controller = new ProjectController(_db, _taskServiceMock.Object);
 
-            var httpContext = new DefaultHttpContext
-            {
-                User = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
-                  {
-                    new Claim(ClaimTypes.NameIdentifier, "user1")
-                  }))
-            };
-            
            
             // Act
-            var result = _controller.Edit(updatedProject);
+            var result = controller.Edit(updatedProject);
 
             // Assert
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("Index", redirectResult.ActionName);
 
-            var dbProject = await _db.Projects.FindAsync(1);
+            var dbProject = _db.Projects.Find(1);
             Assert.NotNull(dbProject);
             Assert.Equal("Updated Project", dbProject.Name);
-            Assert.Null(dbProject.ProjectManagerId);
+            Assert.Equal("12", dbProject.ProjectManagerId);
         }
+
+        [Fact]
+        public void EditPost_UpdateProjectManagerId()
+        {
+            // Arrange
+            var project = new Project { Id = 1, Name = "Original Project", ProjectManagerId = "12" };
+            _db.Projects.Add(project);
+            _db.SaveChanges();
+
+            var updatedProject = new Project { Id = 1, Name = "Original Project", ProjectManagerId = "13" };
+            var controller = new ProjectController(_db, _taskServiceMock.Object);
+
+            // Act
+            var result = controller.Edit(updatedProject);
+
+            // Assert
+            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Index", redirectResult.ActionName);
+
+            var dbProject = _db.Projects.Find(1);
+            Assert.NotNull(dbProject);
+            Assert.Equal("13", dbProject.ProjectManagerId);
+        }
+
 
         [Fact]
         public void DeletePost_ReturnsNotFound_WhenIdIsNull()
@@ -117,6 +130,7 @@ namespace ProjectManagementSystemUnitTests.ControllerTests
             Assert.Equal(0, _db.Projects.Count());
         }
 
+
         [Fact]
         public void DeletePost_NonExistingProject_ReturnsNotFound()
         {
@@ -134,23 +148,19 @@ namespace ProjectManagementSystemUnitTests.ControllerTests
         public void DeletePost_ExistingProject_DeletesProjectAndRedirectsToIndex()
         {
             // Arrange
-            var project = new Project { Id = 1, Name = "Test Project", ProjectManagerId = "TestManager" };
+            var project = new Project { Id = 222, Name = "Test Project", ProjectManagerId = "TestManager" };
             _db.Projects.Add(project);
             _db.SaveChanges();
 
             var controller = new ProjectController(_db, _taskServiceMock.Object);
 
             // Act
-            var result = controller.DeletePost(1);
+            var result = controller.DeletePost(222);
 
             // Assert
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("Index", redirectResult.ActionName);
-            Assert.Null(_db.Projects.Find(1));
+            Assert.Null(_db.Projects.Find(222));
         }
-
-
-
     }
-
 }

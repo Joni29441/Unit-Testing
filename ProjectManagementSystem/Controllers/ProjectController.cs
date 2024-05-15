@@ -95,11 +95,22 @@ namespace ProjectManagementSystem.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Edit(Project project)
         {
-            var managerId = Request.Form["managerId"];
+            if (project == null)
+            {
+                return NotFound();
+            }
 
-            project.ProjectManagerId = managerId;
-            _db.Update(project);
+            var dbProject = _db.Projects.Find(project.Id);
+            if (dbProject == null)
+            {
+                return NotFound();
+            }
+            dbProject.Name = project.Name;
+            dbProject.ProjectManagerId = project.ProjectManagerId;
+
+            _db.Update(dbProject);
             _db.SaveChanges();
+
             return RedirectToAction("Index");
         }
 
