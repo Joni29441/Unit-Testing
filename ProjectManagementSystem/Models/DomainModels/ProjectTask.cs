@@ -3,10 +3,14 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ProjectManagementSystem.Models.DomainModels
 {
-    public enum status { New, InProgress, Finished };
+    public enum status { 
+        New, 
+        InProgress, 
+        Finished 
+    };
 
     public class ProjectTask
-	{
+    {
         [Key]
         public int Id { get; set; }
 

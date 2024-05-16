@@ -21,5 +21,6 @@ namespace ProjectManagementSystem.Models.DomainModels
 
         public ICollection<ProjectTask> Tasks { get; set; }
     }
+
 }
 
