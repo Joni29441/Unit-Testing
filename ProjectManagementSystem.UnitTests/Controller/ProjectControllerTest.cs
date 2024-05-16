@@ -9,9 +9,9 @@ using ProjectManagementSystem.Models.DomainModels;
 using ProjectManagementSystem.Services;
 using System.Security.Claims;
 
-namespace ProjectManagementSystemUnitTests.ControllerTests
+namespace ProjectManagementSystem.UnitTests.ControllerTest
 {
-    public class ProjectControllerTests
+    public class ProjectControllerTest
     {
 
         private readonly ApplicationDbContext _db;
@@ -28,7 +28,7 @@ namespace ProjectManagementSystemUnitTests.ControllerTests
             return dbContext;
         }
 
-        public ProjectControllerTests()
+        public ProjectControllerTest()
         {
             _taskServiceMock = new Mock<ITaskService>();
         }
@@ -223,7 +223,7 @@ namespace ProjectManagementSystemUnitTests.ControllerTests
             var controller = CreateController(dbContext);
             controller.ModelState.AddModelError("Name", "Required");
 
-            var updatedProject = new Project { Id = 1, Name = "Some Project", ProjectManagerId = "12" };
+            var updatedProject = new Project { Id = 1, Name = "Updated Project", ProjectManagerId = "12" };
 
             // Act
             var result = controller.Edit(updatedProject);

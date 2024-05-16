@@ -34,11 +34,11 @@
                 <label asp-for="DeveloperId" class="control-label">Open this menu to select Developer</label>
                 <span asp-validation-for="DeveloperId" class="text-danger"></span>
             </div>
-            <div class="form-floating mb-3">
-                <input asp-for="Deadline" class="form-control" placeholder="Name" />
-                <label asp-for="Deadline" class="control-label"></label>
+           <div class="form-floating mb-3">
+                <input asp-for="Deadline" type="date" class="form-control datepicker" placeholder="Deadline" />
+                <label asp-for="Deadline">Deadline</label>
                 <span asp-validation-for="Deadline" class="text-danger"></span>
-            </div>
+             </div>
             <div class="form-floating mb-3">
                 @Html.DropDownList("projectId", new SelectList(ViewBag.ProjectList, "Id", "Name"), "Select Project", new { @class = "form-control select2", required = "required", data_val = "true", data_val_required = "Project is required field." })   
                 <label asp-for="ProjectId" class="control-label">Project</label>

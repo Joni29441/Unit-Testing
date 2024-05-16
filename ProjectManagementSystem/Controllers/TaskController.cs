@@ -117,11 +117,9 @@ namespace ProjectManagementSystem.Controllers
                 task.IsDeveloperAssigned = false;
             }
 
-            int developerTask = (from t in _db.Tasks
-                                 where task.DeveloperId == t.DeveloperId
-                                 select t.DeveloperId).Count();
+            int developerTaskCount = _db.Tasks.Count(t => t.DeveloperId == task.DeveloperId);
 
-            if (developerTask >= 3 && task.DeveloperId != null)
+            if (developerTaskCount >= 3 && task.DeveloperId != null)
             {
                 TempData["ErrorMessageForDeveloperTasks"] = "Cannot assign more than 3 Tasks to one Developer!";
                 return RedirectToAction("Create");
