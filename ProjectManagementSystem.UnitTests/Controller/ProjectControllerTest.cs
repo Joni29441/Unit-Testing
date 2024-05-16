@@ -193,6 +193,51 @@ namespace ProjectManagementSystemUnitTests.ControllerTests
             Assert.Equal("13", dbProject.ProjectManagerId);
         }
 
+
+        [Fact]
+        public void EditPost_ReturnsNotFound_WhenProjectDoesNotExist()
+        {
+            // Arrange
+            var dbContext = CreateDbContext();
+            var controller = CreateController(dbContext);
+            var updatedProject = new Project { Id = 999, Name = "Updated Project", ProjectManagerId = "12" };
+
+            // Act
+            var result = controller.Edit(updatedProject);
+
+            // Assert
+            var notFoundResult = Assert.IsType<NotFoundResult>(result);
+            Assert.Equal(404, notFoundResult.StatusCode);
+        }
+
+
+        [Fact]
+        public void EditPost_ReturnsViewWithErrors_WhenModelStateIsInvalid()
+        {
+            // Arrange
+            var dbContext = CreateDbContext();
+            var project = new Project { Id = 1, Name = "Original Project", ProjectManagerId = "12" };
+            dbContext.Projects.Add(project);
+            dbContext.SaveChanges();
+
+            var controller = CreateController(dbContext);
+            controller.ModelState.AddModelError("Name", "Required");
+
+            var updatedProject = new Project { Id = 1, Name = "Updated Project", ProjectManagerId = "12" };
+
+            // Act
+            var result = controller.Edit(updatedProject);
+
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+            Assert.Equal("Edit", viewResult.ViewName); 
+            Assert.False(controller.ModelState.IsValid);
+            Assert.True(controller.ModelState.ContainsKey("Name"));
+        }
+
+
+
+
         [Fact]
         public void DeletePost_ReturnsNotFound_WhenIdIsNull()
         {

@@ -105,9 +105,14 @@ namespace ProjectManagementSystem.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Edit(Project project)
         {
-            if (project == null)
+            if (project == null || !_db.Projects.Any(p => p.Id == project.Id))
             {
                 return NotFound();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View("Edit", project);
             }
 
             var dbProject = _db.Projects.Find(project.Id);
