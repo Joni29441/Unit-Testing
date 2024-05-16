@@ -216,14 +216,14 @@ namespace ProjectManagementSystemUnitTests.ControllerTests
         {
             // Arrange
             var dbContext = CreateDbContext();
-            var project = new Project { Id = 1, Name = "Original Project", ProjectManagerId = "12" };
+            var project = new Project { Id = 1, Name = "Some Project", ProjectManagerId = "12" };
             dbContext.Projects.Add(project);
             dbContext.SaveChanges();
 
             var controller = CreateController(dbContext);
             controller.ModelState.AddModelError("Name", "Required");
 
-            var updatedProject = new Project { Id = 1, Name = "Updated Project", ProjectManagerId = "12" };
+            var updatedProject = new Project { Id = 1, Name = "Some Project", ProjectManagerId = "12" };
 
             // Act
             var result = controller.Edit(updatedProject);
