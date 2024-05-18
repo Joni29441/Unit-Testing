@@ -190,6 +190,12 @@ namespace ProjectManagementSystem.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Edit(TaskViewModel taskViewModel)
         {
+            if (!ModelState.IsValid)
+            {
+                ViewBag.DeveloperList = _iTaskService.getDeveloperList();
+                return View(taskViewModel);
+            }
+
             var currentUser = HttpContext.User;
             var roleName = currentUser.FindFirst(ClaimTypes.Role)?.Value;
 
@@ -248,7 +254,6 @@ namespace ProjectManagementSystem.Controllers
             _db.SaveChanges();
             return RedirectToAction("Index");
         }
-
         // GET:
         // Returning View for Deleting a Task
         public IActionResult Delete(int? id)
