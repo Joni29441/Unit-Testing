@@ -14,7 +14,7 @@ using ProjectManagementSystem.Services;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ProjectManagementSystem.Models.ViewModels;
 
-namespace ProjectManagementSystem.UnitTests.ControllerTest
+namespace ProjectManagementSystem.UnitTests.Controller
 {
     public class TaskControllerTest
     {

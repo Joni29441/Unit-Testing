@@ -9,7 +9,7 @@ using ProjectManagementSystem.Models.DomainModels;
 using ProjectManagementSystem.Services;
 using System.Security.Claims;
 
-namespace ProjectManagementSystem.UnitTests.ControllerTest
+namespace ProjectManagementSystem.UnitTests.Controller
 {
     public class ProjectControllerTest
     {

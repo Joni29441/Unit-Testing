@@ -12,7 +12,7 @@ using ProjectManagementSystem.Models.ViewModels;
 using ProjectManagementSystem.Services;
 using Xunit;
 
-namespace ProjectManagementSystemUnitTests.ControllerTests
+namespace ProjectManagementSystem.UnitTests.Controller
 {
     public class UserControllerTests
     {
