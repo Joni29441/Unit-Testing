@@ -10,7 +10,6 @@ using ProjectManagementSystem.Models;
 using ProjectManagementSystem.Models.ViewModels;
 using ProjectManagementSystem.Services;
 
-// For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace ProjectManagementSystem.Controllers
 {
@@ -34,33 +33,7 @@ namespace ProjectManagementSystem.Controllers
         // Returning View with a List of Users
         public IActionResult Index()
         {
-            //var users = _db.Users.ToList();
-
-            //List<UserViewModel> userList = new List<UserViewModel>();
-
-            //foreach (ApplicationUser au in _db.Users)
-            //{
-            //    UserViewModel userViewModel = new UserViewModel();
-            //    userViewModel.Id = au.Id;
-            //    userViewModel.Name = au.Name;
-            //    userViewModel.Surname = au.Surname;
-
-            //    var roleId = (from ur in _db.UserRoles
-            //                  where ur.UserId == au.Id
-            //                  select ur.RoleId).FirstOrDefault();
-
-            //    if (roleId != null)
-            //    {
-            //        var roleName = (from r in _db.Roles
-            //                        where r.Id == roleId
-            //                        select r.Name).First().ToString();
-
-            //        userViewModel.RoleName = roleName;
-            //    }
-
-            //    userList.Add(userViewModel);
-            //}
-
+               
             List<UserViewModel> userList = _iTaskService.getUserList();
 
             return View(userList);
@@ -82,23 +55,30 @@ namespace ProjectManagementSystem.Controllers
                 return NotFound();
             }
 
-            var userRoles = _db.UserRoles.ToList();
-
             var roleId = (from ur in _db.UserRoles
                           where ur.UserId == user.Id
                           select ur.RoleId).FirstOrDefault();
 
-            var roleName = (from r in _db.Roles
-                            where r.Id == roleId
-                            select r.Name).First().ToString();
+            string roleName = null;
 
-            UserViewModel userViewModel = new UserViewModel();
-            userViewModel.Name = user.Name;
-            userViewModel.Surname = user.Surname;
-            userViewModel.RoleName = roleName;
+            if (roleId != null)
+            {
+                roleName = (from r in _db.Roles
+                            where r.Id == roleId
+                            select r.Name).FirstOrDefault();
+            }
+
+            UserViewModel userViewModel = new UserViewModel
+            {
+                Id = user.Id,
+                Name = user.Name,
+                Surname = user.Surname,
+                RoleName = roleName
+            };
 
             return View(userViewModel);
         }
+
 
         // POST:
         // Update Edited User
@@ -152,20 +132,27 @@ namespace ProjectManagementSystem.Controllers
                 return NotFound();
             }
 
-            var userRoles = _db.UserRoles.ToList();
-
             var roleId = (from ur in _db.UserRoles
                           where ur.UserId == user.Id
                           select ur.RoleId).FirstOrDefault();
 
-            var roleName = (from r in _db.Roles
-                            where r.Id == roleId
-                            select r.Name).First().ToString();
+            string roleName = null;
 
-            UserViewModel userViewModel = new UserViewModel();
-            userViewModel.Name = user.Name;
-            userViewModel.Surname = user.Surname;
-            userViewModel.RoleName = roleName;
+            if (roleId != null)
+            {
+                roleName = (from r in _db.Roles
+                            where r.Id == roleId
+                            select r.Name).FirstOrDefault();
+            }
+
+            UserViewModel userViewModel = new UserViewModel
+            {
+                Id = user.Id,
+                Name = user.Name,
+                Surname = user.Surname,
+                RoleName = roleName
+            };
+
             return View(userViewModel);
         }
 

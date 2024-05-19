@@ -99,6 +99,13 @@ namespace ProjectManagementSystem.Controllers
         public async Task<IActionResult> Create(TaskViewModel taskViewModel)
         {
 
+            if (!ModelState.IsValid)
+            {
+                ViewBag.DeveloperList = _iTaskService.getDeveloperList();
+                ViewBag.ProjectList = _iTaskService.getProjectList();
+                return View(taskViewModel);
+            }
+
             ProjectTask task = new ProjectTask();
 
             task.Name = taskViewModel.Name;
@@ -108,6 +115,7 @@ namespace ProjectManagementSystem.Controllers
             task.IsManagerAssigned = true;
             task.IsDeveloperAssigned = true;
 
+            
             // Not more than 3 Tasks per Developer validation
             task.DeveloperId = Request.Form["developerId"];
 

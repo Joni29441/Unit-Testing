@@ -91,22 +91,111 @@ namespace ProjectManagementSystem.UnitTests.ControllerTest
             Assert.Equal(2, model.Count());
         }
 
-        //[Fact]
-        //public void Create_Get_ReturnsViewResult_WithDeveloperAndProjectLists()
-        //{
-        //    // Arrange
-        //    _taskServiceMock.Setup(service => service.getDeveloperList()).Returns(new List<DeveloperViewModel>());
-        //    _taskServiceMock.Setup(service => service.getProjectList()).Returns(new List<ProjectViewModel>());
+        [Fact]
+        public void Create_Get_ReturnsViewResult_WithDeveloperAndProjectLists()
+        {
+            //Arrange
+            _taskServiceMock.Setup(service => service.getDeveloperList()).Returns(new List<DeveloperViewModel>());
+            _taskServiceMock.Setup(service => service.getProjectList()).Returns(new List<Project>());
+            
+            //Act
+            var result = _controller.Create();
 
-        //    // Act
-        //    var result = _controller.Create();
+            //Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+            Assert.NotNull(viewResult.ViewData["DeveloperList"]);
+            Assert.NotNull(viewResult.ViewData["ProjectList"]);
+        }
 
-        //    // Assert
-        //    var viewResult = Assert.IsType<ViewResult>(result);
-        //    Assert.NotNull(viewResult.ViewData["DeveloperList"]);
-        //    Assert.NotNull(viewResult.ViewData["ProjectList"]);
-        //}
+        [Fact]
+        public async Task Create_Post_InvalidModel_ReturnsView()
+        {
+            // Arrange
+            var taskViewModel = new TaskViewModel
+            {
+                Name = "New Task",
+                Description = "Description for New Task",
+                Deadline = "19/19/2024", //Invalid Date
+                DeveloperId = "1",
+                ProjectId = 1
+            };
 
+            _controller.ModelState.AddModelError("Deadline", "19/19/2024");
+
+            _taskServiceMock.Setup(service => service.getDeveloperList()).Returns(new List<DeveloperViewModel>());
+            _taskServiceMock.Setup(service => service.getProjectList()).Returns(new List<Project>());
+
+            // Act
+            var result = await _controller.Create(taskViewModel);
+
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+            Assert.Equal(taskViewModel, viewResult.Model);
+        }
+
+        [Fact]
+        public async Task Create_Post_ValidModel_RedirectsToIndex()
+        {
+            // Arrange
+            var taskViewModel = new TaskViewModel
+            {
+                Name = "New Task",
+                Description = "Description for New Task",
+                Deadline = "01.01.2023",
+                DeveloperId = "1",
+                ProjectId = 1
+            };
+
+            var currentUser = new ClaimsPrincipal(new ClaimsIdentity(new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, "1")
+            }, "mock"));
+
+            _controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext
+                {
+                    User = currentUser,
+                    Request = { Form = new FormCollection(new Dictionary<string, Microsoft.Extensions.Primitives.StringValues>
+            {
+                { "developerId", taskViewModel.DeveloperId },
+                { "projectId", taskViewModel.ProjectId.ToString() }
+            }) }
+                }
+            };
+
+            var project = new Project
+            {
+                Id = 1,
+                Name = "Project 1",
+                ProjectManagerId = "1"
+            };
+
+            var user = new ApplicationUser
+            {
+                Id = "1",
+                Name = "John",
+                Surname = "Doe"
+            };
+
+            _context.Projects.Add(project);
+            _context.Users.Add(user);
+            _context.SaveChanges();
+
+            // Act
+            var result = await _controller.Create(taskViewModel);
+
+            // Assert
+            var redirectToActionResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Index", redirectToActionResult.ActionName);
+
+            var dbTask = _context.Tasks.FirstOrDefault(t => t.Name == "New Task");
+            Assert.NotNull(dbTask);
+            Assert.Equal("Description for New Task", dbTask.Description);
+        }
+
+
+       
 
 
         [Fact]
